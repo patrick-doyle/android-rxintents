@@ -1,10 +1,10 @@
 package com.twistedequations.rxpermission.internal;
 
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 
 import com.twistedequations.rxpermission.RxPermissionResult;
 
@@ -23,7 +23,7 @@ public class RxPermissionFragment extends Fragment {
         this.callback = callback;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);

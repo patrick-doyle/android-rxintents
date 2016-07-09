@@ -12,8 +12,6 @@ import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.support.annotation.WorkerThread;
 
 import com.mttnow.android.rxfingerprint.internal.CancellationSignalSubscription;
-import com.mttnow.android.rxfingerprint.internal.DaggerFingerprintComponent;
-import com.mttnow.android.rxfingerprint.internal.FingerprintComponent;
 import com.mttnow.android.rxfingerprint.internal.FingerprintKeystore;
 import com.mttnow.android.rxfingerprint.internal.FingerprintModule;
 import com.mttnow.android.rxfingerprint.internal.SubscriberFingerprintCipherAuthCallback;
@@ -28,7 +26,8 @@ import rx.functions.Func1;
 @TargetApi(Build.VERSION_CODES.M)
 public class RxFingerprints {
 
-  private static FingerprintComponent fingerprintComponent;
+  private static FingerprintModule fingerprintModule;
+
   private static Func1<FingerprintManager.AuthenticationResult, SymmetricCryptoResult> resultMapFunction
       = new Func1<FingerprintManager.AuthenticationResult, SymmetricCryptoResult>() {
     @Override
@@ -47,7 +46,7 @@ public class RxFingerprints {
    * @see <a href="https://en.wikipedia.org/wiki/Symmetric-key_algorithm">https://en.wikipedia.org/wiki/Symmetric-key_algorithm</a>
    */
   @WorkerThread
-  public static Observable<FingerprintResult<SymmetricCryptoResult>> symmetricEncryptCipher(final Context context, final String keyName) {
+  public static Observable<FingerprintResult<SymmetricCryptoResult>> observableFingerprintSensorSymmetricEncrypt(final Context context, final String keyName) {
     if (!supported(context)) {
       return unsupportedResult(context);
     }
@@ -56,7 +55,7 @@ public class RxFingerprints {
     return Observable.create(new Observable.OnSubscribe<FingerprintResult<SymmetricCryptoResult>>() {
       @Override
       public void call(Subscriber<? super FingerprintResult<SymmetricCryptoResult>> subscriber) {
-        FingerprintKeystore defaultFingerprintKeystore = getComponent().fingerprintSecurity();
+        FingerprintKeystore defaultFingerprintKeystore = getFingerprintKeystore();
         try {
           CancellationSignal cancellationSignal = new CancellationSignal();
           subscriber.add(new CancellationSignalSubscription(cancellationSignal));
@@ -79,19 +78,19 @@ public class RxFingerprints {
 
   /**
    * Returns on observable that will listen emit a {@link FingerprintResult} which will contain an result code, crypto object with a cipher for decrypting if
-   * success or and error code if they occurred. The IV is stored in a file when {@link RxFingerprints#symmetricEncryptCipher(Context, String)}
-   * is used. This will return a valid cipher until {@link RxFingerprints#symmetricEncryptCipher(Context, String)} is called again.
+   * success or and error code if they occurred. The IV is stored in a file when {@link RxFingerprints#observableFingerprintSensorSymmetricEncrypt(Context, String)}
+   * is used. This will return a valid cipher until {@link RxFingerprints#observableFingerprintSensorSymmetricEncrypt(Context, String)} is called again.
    * <p/>
    * The crypt object is null unless the {@link FingerprintResult#isSuccess()} returns true
    *
    * @param initializationVector the initialization vector to use to set up the key. This must be the one from the {@link Cipher} in the {@link SymmetricCryptoResult}
-   *                             emitted from the {@link #symmetricEncryptCipher(Context, String)} method.
+   *                             emitted from the {@link #observableFingerprintSensorSymmetricEncrypt(Context, String)} method.
    * @param context              the app context
    * @param keyName              the name of the key to retrieve
    * @see <a href="https://en.wikipedia.org/wiki/Symmetric-key_algorithm">https://en.wikipedia.org/wiki/Symmetric-key_algorithm</a>
    */
   @WorkerThread
-  public static Observable<FingerprintResult<SymmetricCryptoResult>> symmetricDecryptionCipher(final Context context, final String keyName, final byte[] initializationVector) {
+  public static Observable<FingerprintResult<SymmetricCryptoResult>> observableFingerprintSensorSymmetricDecrypt(final Context context, final String keyName, final byte[] initializationVector) {
     if (!supported(context)) {
       return unsupportedResult(context);
     }
@@ -100,7 +99,7 @@ public class RxFingerprints {
     return Observable.create(new Observable.OnSubscribe<FingerprintResult<SymmetricCryptoResult>>() {
       @Override
       public void call(Subscriber<? super FingerprintResult<SymmetricCryptoResult>> subscriber) {
-        FingerprintKeystore defaultFingerprintKeystore = getComponent().fingerprintSecurity();
+        FingerprintKeystore defaultFingerprintKeystore = getFingerprintKeystore();
         try {
           CancellationSignal cancellationSignal = new CancellationSignal();
           subscriber.add(new CancellationSignalSubscription(cancellationSignal));
@@ -133,17 +132,15 @@ public class RxFingerprints {
    * @see <a href="https://en.wikipedia.org/wiki/Public-key_cryptography">https://en.wikipedia.org/wiki/Public-key_cryptography</a>
    */
   @WorkerThread
-  public static Observable<FingerprintResult<AsymmetricCryptoResult>> observeAsymmetricSignature(final Context context, final String keyName) {
+  public static Observable<FingerprintResult<AsymmetricCryptoResult>> observableFingerprintSensorAsymmetricDecrypt(final Context context, final String keyName) {
     return Observable.empty();
   }
 
-  private static FingerprintComponent getComponent() {
-    if (fingerprintComponent == null) {
-      fingerprintComponent = DaggerFingerprintComponent.builder()
-          .fingerprintModule(new FingerprintModule())
-          .build();
+  private static FingerprintKeystore getFingerprintKeystore() {
+    if (fingerprintModule == null) {
+      fingerprintModule = new FingerprintModule();
     }
-    return fingerprintComponent;
+    return fingerprintModule.fingerprintSecurity();
   }
 
   private static boolean supported(Context context) {

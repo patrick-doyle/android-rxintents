@@ -1,0 +1,60 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+        consumerProguardFiles fileTree('proguard')
+    }
+
+    sourceSets {
+        test.java.srcDirs += 'src/test/kotlin'
+    }
+
+    dexOptions {
+        preDexLibraries false
+    }
+
+    //Used to ignore duplicated entries added to meta-inf
+    packagingOptions {
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice'
+        exclude 'META-INF/notice.txt'
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-annotations:24.0.0'
+    compile 'io.reactivex:rxjava:1.1.5'
+
+    testCompile 'org.jetbrains.kotlin:kotlin-stdlib:1.0.2'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.9.5'
+    testCompile 'com.google.truth:truth:0.27'
+}
+
+apply from: "../maven.gradle"
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            artifactId 'rx-fingerprint'
+        }
+    }
+}

@@ -22,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.rx_permissions)
     Button permissionsButton;
 
+    @BindView(R.id.rx_fingerprint)
+    Button fingerprintButton;
+
     private final CompositeSubscription compositeSubscription = new CompositeSubscription();
 
     @Override
@@ -31,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         compositeSubscription.add(moveToRxIntentActivity(button));
         compositeSubscription.add(moveToRxPermissionsActivity(permissionsButton));
+        compositeSubscription.add(moveToRxFingerprintActivity(fingerprintButton));
     }
 
     @Override
@@ -55,6 +59,16 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void call(Void aVoid) {
                         RxPermissionActivity.start(MainActivity.this);
+                    }
+                });
+    }
+
+    private Subscription moveToRxFingerprintActivity(View view) {
+        return RxView.clicks(view)
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                      RxFingerprintActivity.start(MainActivity.this);
                     }
                 });
     }

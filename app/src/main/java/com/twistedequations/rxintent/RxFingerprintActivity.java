@@ -1,6 +1,9 @@
 package com.twistedequations.rxintent;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.widget.Button;
@@ -28,7 +31,7 @@ import rx.subscriptions.CompositeSubscription;
 public class RxFingerprintActivity extends AppCompatActivity {
 
   private static final String ENCRYPT_KEY_KEY = "temp_key";
-  private CompositeSubscription compositeSubscription = new CompositeSubscription();
+  private final CompositeSubscription compositeSubscription = new CompositeSubscription();
 
   @BindView(R.id.edittext)
   EditText editText;
@@ -48,6 +51,12 @@ public class RxFingerprintActivity extends AppCompatActivity {
   byte[] iv;
   byte[] encryptedBytes;
 
+  private AlertDialog alertDialog;
+
+  public static void start(Activity activity) {
+    activity.startActivity(new Intent(activity, RxFingerprintActivity.class));
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -55,6 +64,11 @@ public class RxFingerprintActivity extends AppCompatActivity {
     ButterKnife.bind(this);
     compositeSubscription.add(observabeEncrpytButton(encrpytButton, editText));
     compositeSubscription.add(observabeDecrpytButton(decrpytButton, encrpytTextView));
+
+    alertDialog = new AlertDialog.Builder(this)
+        .setMessage("Touch Sensor")
+        .setView(R.layout.fingerprint_dialog)
+        .create();
   }
 
   @Override
@@ -71,10 +85,16 @@ public class RxFingerprintActivity extends AppCompatActivity {
             return editText.getText().toString();
           }
         })
+        .doOnNext(new Action1<String>() {
+          @Override
+          public void call(String s) {
+            alertDialog.show();
+          }
+        })
         .flatMap(new Func1<String, Observable<byte[]>>() {
           @Override
           public Observable<byte[]> call(final String s) {
-            return RxFingerprints.symmetricEncryptCipher(RxFingerprintActivity.this, ENCRYPT_KEY_KEY)
+            return RxFingerprints.observableFingerprintSensorSymmetricEncrypt(RxFingerprintActivity.this, ENCRYPT_KEY_KEY)
                 .flatMap(new Func1<FingerprintResult<SymmetricCryptoResult>, Observable<byte[]>>() {
                   @Override
                   public Observable<byte[]> call(FingerprintResult<SymmetricCryptoResult> fingerprintResult) {
@@ -86,6 +106,12 @@ public class RxFingerprintActivity extends AppCompatActivity {
                     }
                   }
                 });
+          }
+        })
+        .doOnNext(new Action1<byte[]>() {
+          @Override
+          public void call(byte[] bytes) {
+            alertDialog.hide();
           }
         })
         .doOnError(new Action1<Throwable>() {
@@ -113,10 +139,30 @@ public class RxFingerprintActivity extends AppCompatActivity {
             return textView.getText().toString();
           }
         })
+        .doOnNext(new Action1<String>() {
+          @Override
+          public void call(String s) {
+            if(RxFingerprintActivity.this.encryptedBytes == null) {
+              Toast.makeText(RxFingerprintActivity.this, "Need to encrypt some text first", Toast.LENGTH_SHORT).show();
+            }
+          }
+        })
+        .filter(new Func1<String, Boolean>() {
+          @Override
+          public Boolean call(String s) {
+            return RxFingerprintActivity.this.encryptedBytes != null;
+          }
+        })
+        .doOnNext(new Action1<String>() {
+          @Override
+          public void call(String s) {
+            alertDialog.show();
+          }
+        })
         .flatMap(new Func1<String, Observable<byte[]>>() {
           @Override
           public Observable<byte[]> call(final String s) {
-            return RxFingerprints.symmetricDecryptionCipher(RxFingerprintActivity.this, ENCRYPT_KEY_KEY, iv)
+            return RxFingerprints.observableFingerprintSensorSymmetricDecrypt(RxFingerprintActivity.this, ENCRYPT_KEY_KEY, iv)
                 .flatMap(new Func1<FingerprintResult<SymmetricCryptoResult>, Observable<byte[]>>() {
                   @Override
                   public Observable<byte[]> call(FingerprintResult<SymmetricCryptoResult> fingerprintResult) {
@@ -127,6 +173,12 @@ public class RxFingerprintActivity extends AppCompatActivity {
                     }
                   }
                 });
+          }
+        })
+        .doOnNext(new Action1<byte[]>() {
+          @Override
+          public void call(byte[] bytes) {
+            alertDialog.hide();
           }
         })
         .doOnError(new Action1<Throwable>() {

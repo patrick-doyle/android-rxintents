@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
-
-</LinearLayout>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:drawableLeft="@drawable/ic_fingerprint"
+          android:drawablePadding="10dp"
+          android:drawableStart="@drawable/ic_fingerprint"
+          android:paddingBottom="20dp"
+          android:gravity="center_vertical|start"
+          android:paddingLeft="30dp"
+          android:paddingRight="30dp"
+          android:text="@string/touch_fingerprint_sensor"
+          android:textColor="@color/abbey"
+          android:tint="@color/abbey"/>
