@@ -13,7 +13,7 @@ install {
             inceptionYear '2016'
 
             packaging 'aar'
-            groupId 'com.twistedequations'
+            groupId 'com.twistedequations.rx'
             version = project.property('maven.version')
 
             licenses {
@@ -24,9 +24,8 @@ install {
                 }
             }
             scm {
-                connection 'https://github.com/TwistedEquations/android-rxintent.git'
-                url 'https://github.com/TwistedEquations/android-rxmvl'
-
+                connection 'https://github.com/TwistedEquations/android-rxintents.git'
+                url 'https://github.com/TwistedEquations/android-rxintents'
             }
             developers {
                 developer {
