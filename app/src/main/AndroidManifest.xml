@@ -18,8 +18,6 @@
             </intent-filter>
         </activity>
         <activity android:name="com.twistedequations.rxintent.RxIntentActivity"/>
-        <activity android:name="com.twistedequations.rxintent.RxPermissionActivity"/>
-        <activity android:name="com.twistedequations.rxintent.RxFingerprintActivity"/>
     </application>
 
 </manifest>

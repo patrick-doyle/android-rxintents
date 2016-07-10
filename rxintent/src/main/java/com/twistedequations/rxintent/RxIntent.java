@@ -4,27 +4,32 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.twistedequations.rxintent.internal.RxIntentOnSubscribe;
-
-import java.util.Random;
+import com.twistedequations.rxintent.internal.RxIntentObserveOnSubscribe;
 
 import rx.Observable;
 
 public class RxIntent {
 
-    private RxIntent(){}
-
-    private static final Random random = new Random();
-
-    public static Observable<RxIntentResult> forResult(Activity activity, Intent intent) {
-        return forResult(activity, intent, random.nextInt(30));
+    private RxIntent() {
     }
 
-    public static Observable<RxIntentResult> forResult(Activity activity, Intent intent, int requestCode) {
-        return forResult(activity, intent, null, requestCode);
+    public static Observable<RxIntentResult> observeActivityForResult(Activity activity, Intent intent, int requestCode) {
+        return Observable.create(new RxIntentObserveOnSubscribe(activity, intent, null, requestCode));
     }
 
-    public static Observable<RxIntentResult> forResult(Activity activity, Intent intent, Bundle options, int requestCode) {
-        return Observable.create(new RxIntentOnSubscribe(activity, intent, requestCode, options));
+    public static Observable<RxIntentResult> startActivityForResult(Activity activity, Intent intent, Bundle options, int requestCode) {
+        return Observable.create(new RxIntentObserveOnSubscribe(activity, intent, options, requestCode));
+    }
+
+    /**
+     * Start the an activity for result
+     * @return
+     */
+    public static Observable<RxIntentResult> startActivityForResult(Activity activity, Intent intent, int requestCode) {
+        RxIntentObserveOnSubscribe rxIntentObserveOnSubscribe = new RxIntentObserveOnSubscribe(activity, intent, null, requestCode);
+        Observable<RxIntentResult> observable = Observable.create(rxIntentObserveOnSubscribe);
+        rxIntentObserveOnSubscribe.start();
+        return observable;
     }
 }
+

@@ -13,16 +13,4 @@
         android:layout_height="wrap_content"
         android:text="Rx Intents"/>
 
-    <Button
-        android:id="@+id/rx_permissions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Rx Permission"/>
-
-    <Button
-        android:id="@+id/rx_fingerprint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Rx Fingerprint"/>
-
 </LinearLayout>

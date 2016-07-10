@@ -1,1 +1,1 @@
-include ':app', ':rxintent', ':rxpermission', ':rxfingerprint'
+include ':app', ':rxintent'
