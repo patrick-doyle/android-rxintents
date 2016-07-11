@@ -20,7 +20,7 @@ In your module build.gradle file add to the dependencies block
         compile "com.twistedequations.rx:rx-intent:1.0.0"
     }
 ```
-
+If its giving an error about not finding a jar file use `com.twistedequations.rx:rx-intent:1.0.0@aar` instead
 
 ## Usage
 
