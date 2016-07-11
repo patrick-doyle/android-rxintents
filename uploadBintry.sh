@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-./gradlew clean :rxintent:build :rxintent:bintrayUpload
+./gradlew clean :rx-intent:build :rx-intent:bintrayUpload

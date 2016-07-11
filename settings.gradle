@@ -1,1 +1,1 @@
-include ':app', ':rxintent'
+include ':app', ':rx-intent'
