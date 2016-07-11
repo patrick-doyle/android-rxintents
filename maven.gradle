@@ -1,14 +1,14 @@
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = 'com.twistedequations'
+group = 'com.twistedequations.rx'
 version = project.property('maven.version')
 
 install {
     repositories.mavenInstaller {
         pom.project {
-            name 'Android RxMVL'
-            description 'RxMVL helper library for android'
+            name 'Android Rx Intents'
+            description 'Rx Intents helper library for android to map startActivityForResult to an observable'
             url 'https://github.com/TwistedEquations/android-rxintent'
             inceptionYear '2016'
 
@@ -68,7 +68,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = 'maven'
-        name = 'android-rxmvl'
+        name = 'rx-intent'
         userOrg = user
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/TwistedEquations/android-rxintent.git'
