@@ -40,5 +40,27 @@ public class RxIntent {
     public static void startActivityForResult(Activity activity, Intent intent, Bundle options, int requestCode) {
         RxIntentObserveOnSubscribe.start(activity, intent, options, requestCode);
     }
+
+    /**
+     * Sets up a new Observable RxIntentResult is the same way as {@link #startActivityForResult(Activity, Intent, Bundle, int)} and will start the activity as
+     * well.
+     * @see #startActivityForResult(Activity, Intent, Bundle, int)
+     * @see #startActivityForResult(Activity, Intent, Bundle, int)
+     */
+    public static Observable<RxIntentResult> startAndObserveActivityForResult(Activity activity, Intent intent, Bundle options, int requestCode) {
+        Observable<RxIntentResult> rxResultObservable = Observable.create(new RxIntentObserveOnSubscribe(activity, requestCode));
+        startActivityForResult(activity,intent, options, requestCode);
+        return rxResultObservable;
+    }
+
+    /**
+     * Sets up a new Observable RxIntentResult is the same way as {@link #startActivityForResult(Activity, Intent, Bundle, int)} and will start the activity as
+     * well.
+     * @see #startActivityForResult(Activity, Intent, Bundle, int)
+     * @see #startActivityForResult(Activity, Intent, Bundle, int)
+     */
+    public static Observable<RxIntentResult> startAndObserveActivityForResult(Activity activity, Intent intent, int requestCode) {
+        return startAndObserveActivityForResult(activity, intent, null, requestCode);
+    }
 }
 
