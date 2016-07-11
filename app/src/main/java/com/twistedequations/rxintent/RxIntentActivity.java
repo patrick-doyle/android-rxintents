@@ -20,6 +20,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.observables.ConnectableObservable;
 import rx.subscriptions.CompositeSubscription;
 
 public class RxIntentActivity extends AppCompatActivity {
@@ -56,22 +57,22 @@ public class RxIntentActivity extends AppCompatActivity {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
 
-        final Observable<RxIntentResult> rxIntentObservable =
-                RxIntent.observeActivityForResult(RxIntentActivity.this, intent, REQUEST_CODE);
-
-        final Observable<RxIntentResult> result = RxView.clicks(view)
-                .switchMap(new Func1<Void, Observable<RxIntentResult>>() {
-                    @Override
-                    public Observable<RxIntentResult> call(Void aVoid) {
-                        return RxIntent.startActivityForResult(RxIntentActivity.this, intent, REQUEST_CODE);
-                    }
-                });
-
-        final Observable<RxIntentResult> rxIntentResultObservable =
-                Observable.merge(rxIntentObservable, result).publish().autoConnect();
+        final ConnectableObservable<RxIntentResult> rxIntentObservable =
+                RxIntent.observeActivityForResult(RxIntentActivity.this, REQUEST_CODE).publish();
 
         CompositeSubscription compositeSubscription = new CompositeSubscription();
-        Subscription resultOkSub = rxIntentResultObservable.filter(new Func1<RxIntentResult, Boolean>() {
+
+        final Subscription clicksSub = RxView.clicks(view)
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        RxIntent.startActivityForResult(RxIntentActivity.this, intent, REQUEST_CODE);
+                    }
+                });
+        compositeSubscription.add(clicksSub);
+
+
+        final Subscription resultOkSub = rxIntentObservable.filter(new Func1<RxIntentResult, Boolean>() {
             @Override
             public Boolean call(RxIntentResult rxIntentResult) {
                 return rxIntentResult.resultCode == Activity.RESULT_OK;
@@ -91,7 +92,7 @@ public class RxIntentActivity extends AppCompatActivity {
         });
         compositeSubscription.add(resultOkSub);
 
-        Subscription resultNotOkSub = rxIntentResultObservable.filter(new Func1<RxIntentResult, Boolean>() {
+        final Subscription resultNotOkSub = rxIntentObservable.filter(new Func1<RxIntentResult, Boolean>() {
             @Override
             public Boolean call(RxIntentResult rxIntentResult) {
                 return rxIntentResult.resultCode != Activity.RESULT_OK;
@@ -103,6 +104,7 @@ public class RxIntentActivity extends AppCompatActivity {
             }
         });
         compositeSubscription.add(resultNotOkSub);
+        rxIntentObservable.connect();
         return compositeSubscription;
     }
 }

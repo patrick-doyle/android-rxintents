@@ -18,14 +18,10 @@ import rx.subscriptions.BooleanSubscription;
 public class RxIntentObserveOnSubscribe implements Observable.OnSubscribe<RxIntentResult> {
 
     private final Activity activity;
-    private final Intent intent;
-    private final Bundle options;
     private final int requestCode;
 
-    public RxIntentObserveOnSubscribe(Activity activity, Intent intent, Bundle options, int requestCode) {
+    public RxIntentObserveOnSubscribe(Activity activity, int requestCode) {
         this.activity = activity;
-        this.intent = intent;
-        this.options = options;
         this.requestCode = requestCode;
         PreConditions.throwIfNotOnMainThread();
     }
@@ -56,15 +52,15 @@ public class RxIntentObserveOnSubscribe implements Observable.OnSubscribe<RxInte
 
         subscriber.add(BooleanSubscription.create(removeCallbackFunc));
         //sets the callback for the observable
-        getFragment().addCallback(callback);
+        getFragment(activity, requestCode).addCallback(callback);
     }
 
-    public void start() {
+    public static void start(Activity activity, Intent intent, Bundle options, int requestCode) {
         PreConditions.throwIfNotOnMainThread();
-        getFragment().setStartData(this.intent, options, requestCode);
+        getFragment(activity, requestCode).setStartData(intent, options, requestCode);
     }
 
-    private RxIntentFragment getFragment() {
+    private static RxIntentFragment getFragment(Activity activity, int requestCode) {
         final FragmentManager fragmentManager = activity.getFragmentManager();
         final RxIntentFragment intentFragment;
         Fragment fragment = fragmentManager.findFragmentByTag(fragmentTag(requestCode));
